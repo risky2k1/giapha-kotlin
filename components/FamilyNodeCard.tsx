@@ -3,8 +3,7 @@
 import { Person } from "@/types";
 import { Minus, Plus } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useDashboard } from "./DashboardContext";
 import DefaultAvatar from "./DefaultAvatar";
 
 interface FamilyNodeCardProps {
@@ -30,11 +29,9 @@ export default function FamilyNodeCard({
   isRingVisible = false,
   isPlusVisible = false,
 }: FamilyNodeCardProps) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
+  const { showAvatar, setMemberModalId } = useDashboard();
 
   const isDeceased = person.is_deceased;
-  const showAvatar = searchParams.get("avatar") !== "hide";
 
   const content = (
     <div
@@ -134,16 +131,9 @@ export default function FamilyNodeCard({
     return content;
   }
 
-  const newParams = new URLSearchParams(searchParams.toString());
-  newParams.set("memberModalId", person.id);
-
   return (
-    <Link
-      href={`${pathname}?${newParams.toString()}`}
-      scroll={false}
-      className="block w-fit"
-    >
+    <div onClick={() => setMemberModalId(person.id)} className="block w-fit">
       {content}
-    </Link>
+    </div>
   );
 }

@@ -5,9 +5,8 @@ import { formatDisplayDate } from "@/utils/dateHelpers";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronRight, Share2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useDashboard } from "./DashboardContext";
 import DefaultAvatar from "./DefaultAvatar";
 
 interface MindmapTreeProps {
@@ -21,9 +20,7 @@ export default function MindmapTree({
   relationships,
   roots,
 }: MindmapTreeProps) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const showAvatar = searchParams.get("avatar") !== "hide";
+  const { showAvatar, setMemberModalId } = useDashboard();
 
   // Helper function to resolve tree connections for a person
   const getTreeData = (personId: string) => {
@@ -122,15 +119,14 @@ export default function MindmapTree({
           </div>
 
           {(() => {
-            const mainParams = new URLSearchParams(searchParams.toString());
-            mainParams.set("memberModalId", data.person.id);
             return (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`group/card relative flex flex-wrap items-center gap-2 bg-white/60 backdrop-blur-md rounded-2xl border border-stone-200/60 p-2 sm:p-2.5 shadow-sm hover:border-amber-300 hover:shadow-md hover:bg-white/90 transition-all duration-300 overflow-hidden
+                className={`group/card relative flex flex-wrap items-center gap-2 bg-white/60 backdrop-blur-md rounded-2xl border border-stone-200/60 p-2 sm:p-2.5 shadow-sm hover:border-amber-300 hover:shadow-md hover:bg-white/90 transition-all duration-300 overflow-hidden cursor-pointer
                   ${data.person.is_deceased ? "opacity-80 grayscale-[0.3]" : ""}`}
+                onClick={() => setMemberModalId(data.person.id)}
               >
                 {/* Decorative gradient blob */}
                 {/* <div
@@ -138,11 +134,7 @@ export default function MindmapTree({
                 /> */}
 
                 <div className="flex items-center gap-2.5 relative z-10 w-full">
-                  <Link
-                    href={`${pathname}?${mainParams.toString()}`}
-                    className="flex flex-1 items-center gap-2.5 min-w-0"
-                    scroll={false}
-                  >
+                  <div className="flex flex-1 items-center gap-2.5 min-w-0">
                     {showAvatar && (
                       <div className="relative shrink-0">
                         <div
@@ -225,22 +217,20 @@ export default function MindmapTree({
                         </div>
                       )}
                     </div>
-                  </Link>
+                  </div>
 
                   {/* Spouses attached to node */}
                   {data.spouses.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 ml-1 pl-2 relative before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-px before:h-[70%] before:bg-stone-200/80">
                       {data.spouses.map((spouseData) => {
-                        const spouseParams = new URLSearchParams(
-                          searchParams.toString(),
-                        );
-                        spouseParams.set("memberModalId", spouseData.person.id);
                         return (
-                          <Link
+                          <div
                             key={spouseData.person.id}
-                            href={`${pathname}?${spouseParams.toString()}`}
-                            scroll={false}
-                            className={`flex flex-col items-center gap-1 bg-stone-50/50 hover:bg-white rounded-xl p-1.5 border border-stone-200/60 hover:border-amber-300 transition-all shadow-sm hover:shadow-md group/spouse
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMemberModalId(spouseData.person.id);
+                            }}
+                            className={`flex flex-col items-center gap-1 bg-stone-50/50 hover:bg-white rounded-xl p-1.5 border border-stone-200/60 hover:border-amber-300 transition-all shadow-sm hover:shadow-md group/spouse cursor-pointer
                               ${spouseData.person.is_deceased ? "opacity-80 grayscale-[0.3]" : ""}`}
                             title={
                               spouseData.note ||
@@ -279,7 +269,7 @@ export default function MindmapTree({
                             <span className="text-[10px] font-bold text-stone-600 truncate max-w-[50px] text-center">
                               {spouseData.person.full_name.split(" ").pop()}
                             </span>
-                          </Link>
+                          </div>
                         );
                       })}
                     </div>

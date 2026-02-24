@@ -1,17 +1,9 @@
-import config from "@/app/config";
-import AvatarToggle from "@/components/AvatarToggle";
-import DashboardMemberList from "@/components/DashboardMemberList";
-import ExportButton from "@/components/ExportButton";
-import FamilyTree from "@/components/FamilyTree";
-import Footer from "@/components/Footer";
-import HeaderMenu from "@/components/HeaderMenu";
-import MindmapTree from "@/components/MindmapTree";
-import RootSelector from "@/components/RootSelector";
-import ViewToggle, { ViewMode } from "@/components/ViewToggle";
-import { Person } from "@/types";
+import { DashboardProvider } from "@/components/DashboardContext";
+import DashboardViews from "@/components/DashboardViews";
+import MemberDetailModal from "@/components/MemberDetailModal";
+import ViewToggle from "@/components/ViewToggle";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 interface PageProps {
@@ -19,8 +11,7 @@ interface PageProps {
 }
 
 export default async function FamilyTreePage({ searchParams }: PageProps) {
-  const { view, rootId } = await searchParams;
-  const currentView = (view as ViewMode) || "list";
+  const { rootId } = await searchParams;
 
   // If view is list, we only need persons, not relationships.
   // We fetch persons for all views to pass down as a prop if we want, or let components fetch.
@@ -36,15 +27,6 @@ export default async function FamilyTreePage({ searchParams }: PageProps) {
   if (!user) {
     redirect("/login");
   }
-
-  // Check role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin = profile?.role === "admin";
 
   const { data: personsData } = await supabase
     .from("persons")
@@ -80,71 +62,12 @@ export default async function FamilyTreePage({ searchParams }: PageProps) {
     }
   }
 
-  let roots: Person[] = [];
-  if (finalRootId && personsMap.has(finalRootId)) {
-    roots = [personsMap.get(finalRootId)];
-  }
-
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col font-sans">
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm transition-all duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="group flex items-center gap-2 cursor-pointer"
-            >
-              <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 group-hover:text-amber-700 transition-colors">
-                {config.siteName}
-              </h1>
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <HeaderMenu isAdmin={isAdmin} userEmail={user.email} />
-          </div>
-        </div>
-        <ViewToggle />
-      </header>
+    <DashboardProvider>
+      <ViewToggle />
+      <DashboardViews persons={persons} relationships={relationships} />
 
-      <main className="flex-1 overflow-auto bg-stone-50/50 flex flex-col">
-        {currentView !== "list" && persons.length > 0 && finalRootId && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 w-full flex flex-wrap items-center justify-center gap-4 relative z-20">
-            <RootSelector persons={persons} currentRootId={finalRootId} />
-            <div className="flex items-center gap-2">
-              <AvatarToggle />
-              <ExportButton />
-            </div>
-          </div>
-        )}
-
-        {currentView === "list" && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full relative z-10">
-            <DashboardMemberList initialPersons={persons} />
-          </div>
-        )}
-
-        <div className="flex-1 w-full relative z-10">
-          {currentView === "tree" && (
-            <FamilyTree
-              personsMap={personsMap}
-              relationships={relationships}
-              roots={roots}
-            />
-          )}
-          {currentView === "mindmap" && (
-            <MindmapTree
-              personsMap={personsMap}
-              relationships={relationships}
-              roots={roots}
-            />
-          )}
-        </div>
-      </main>
-
-      <Footer
-        className="mt-auto bg-white border-t border-stone-200"
-        showDisclaimer={true}
-      />
-    </div>
+      <MemberDetailModal />
+    </DashboardProvider>
   );
 }

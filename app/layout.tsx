@@ -1,7 +1,5 @@
-import MemberDetailModal from "@/components/MemberDetailModal";
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import { Suspense } from "react";
 import config from "./config";
 import "./globals.css";
 
@@ -29,9 +27,6 @@ export default function RootLayout({
         className={`${inter.variable} ${playfair.variable} font-sans antialiased relative`}
       >
         {children}
-        <Suspense fallback={null}>
-          <MemberDetailModal />
-        </Suspense>
       </body>
     </html>
   );

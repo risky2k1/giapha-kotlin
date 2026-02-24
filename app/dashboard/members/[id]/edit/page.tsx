@@ -63,26 +63,24 @@ export default async function EditMemberPage({ params }: PageProps) {
   const initialData = { ...person, ...privateData };
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col relative overflow-hidden">
+    <div className="flex-1 w-full relative flex flex-col pb-8">
       {/* Decorative background blurs */}
       <div className="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] bg-amber-200/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-[40%] -right-[10%] w-[400px] h-[400px] bg-stone-300/20 rounded-full blur-[100px] pointer-events-none" />
 
-      <header className="sticky top-0 z-30 bg-white/60 backdrop-blur-md border-b border-stone-200/60 shadow-sm transition-all duration-200">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-800">
-            Chỉnh Sửa Thành Viên
-          </h1>
-          <a
-            href={`/dashboard/members/${id}`}
-            className="text-stone-500 hover:text-stone-800 font-medium text-sm transition-colors"
-          >
-            Hủy
-          </a>
-        </div>
-      </header>
+      <div className="w-full relative z-20 py-4 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto flex items-center justify-between">
+        <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-800">
+          Chỉnh Sửa Thành Viên
+        </h1>
+        <a
+          href={`/dashboard/members/${id}`}
+          className="text-stone-500 hover:text-stone-800 font-medium text-sm transition-colors"
+        >
+          Hủy
+        </a>
+      </div>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10 w-full">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10 w-full flex-1">
         <MemberForm initialData={initialData} isEditing={true} isAdmin={true} />
       </main>
     </div>

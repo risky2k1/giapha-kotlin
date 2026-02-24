@@ -3,8 +3,8 @@
 import { Person } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronDown, Search } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useDashboard } from "./DashboardContext";
 
 export default function RootSelector({
   persons,
@@ -13,9 +13,7 @@ export default function RootSelector({
   persons: Person[];
   currentRootId: string;
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { setRootId } = useDashboard();
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,9 +27,7 @@ export default function RootSelector({
   );
 
   const handleSelect = (personId: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("rootId", personId);
-    router.push(`${pathname}?${params.toString()}`);
+    setRootId(personId);
     setIsOpen(false);
     setSearchTerm("");
   };

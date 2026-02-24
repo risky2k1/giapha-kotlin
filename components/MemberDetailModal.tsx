@@ -6,16 +6,12 @@ import { createClient } from "@/utils/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, Edit2, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useDashboard } from "./DashboardContext";
 
 export default function MemberDetailModal() {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
+  const { memberModalId: memberId, setMemberModalId } = useDashboard();
   const supabase = createClient();
-
-  const memberId = searchParams.get("memberModalId");
   const [isOpen, setIsOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -32,9 +28,7 @@ export default function MemberDetailModal() {
 
   // Close modal by removing query parameter while keeping others
   const closeModal = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("memberModalId");
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    setMemberModalId(null);
   };
 
   const fetchData = useCallback(

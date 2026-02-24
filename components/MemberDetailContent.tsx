@@ -69,7 +69,7 @@ export default function MemberDetailContent({
       <div className="h-28 sm:h-36 bg-linear-to-r from-stone-200 via-stone-100 to-stone-200 relative shrink-0">
         {/* Decorative blur in cover */}
         <div
-          className={`absolute -right-20 -top-20 w-64 h-64 rounded-full blur-[60px] opacity-40 ${person.gender === "male" ? "bg-sky-300" : person.gender === "female" ? "bg-rose-300" : "bg-stone-300"}`}
+          className={`absolute right-0 -top-20 w-64 h-64 rounded-full blur-[60px] opacity-40 ${person.gender === "male" ? "bg-sky-300" : person.gender === "female" ? "bg-rose-300" : "bg-stone-300"}`}
         />
         <div className="absolute -left-20 -bottom-20 w-64 h-64 rounded-full blur-[60px] opacity-20 bg-amber-200" />
 

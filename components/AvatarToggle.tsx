@@ -1,23 +1,13 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useDashboard } from "./DashboardContext";
 
 export default function AvatarToggle() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const showAvatar = searchParams.get("avatar") !== "hide";
+  const { showAvatar, setShowAvatar } = useDashboard();
 
   const toggleAvatar = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (showAvatar) {
-      params.set("avatar", "hide");
-    } else {
-      params.delete("avatar");
-    }
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    setShowAvatar(!showAvatar);
   };
 
   return (

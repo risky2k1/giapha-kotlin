@@ -3,8 +3,7 @@
 import { Person } from "@/types";
 import { formatDisplayDate } from "@/utils/dateHelpers";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useDashboard } from "./DashboardContext";
 import DefaultAvatar from "./DefaultAvatar";
 import { FemaleIcon, MaleIcon } from "./GenderIcons";
 
@@ -13,13 +12,9 @@ interface PersonCardProps {
 }
 
 export default function PersonCard({ person }: PersonCardProps) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
+  const { setMemberModalId } = useDashboard();
 
   const isDeceased = person.is_deceased;
-
-  const newParams = new URLSearchParams(searchParams.toString());
-  newParams.set("memberModalId", person.id);
 
   const getGenderStyle = (gender: string) => {
     if (gender === "male") return "bg-sky-100 text-sky-600";
@@ -28,9 +23,8 @@ export default function PersonCard({ person }: PersonCardProps) {
   };
 
   return (
-    <Link
-      href={`${pathname}?${newParams.toString()}`}
-      scroll={false}
+    <div
+      onClick={() => setMemberModalId(person.id)}
       className={`group block relative bg-white/60 backdrop-blur-md p-2 sm:p-4 rounded-2xl shadow-sm border border-stone-200/60 hover:border-amber-300 hover:shadow-md hover:bg-white/90 transition-all duration-300 cursor-pointer overflow-hidden
         ${isDeceased ? "opacity-80 grayscale-[0.3]" : ""}`}
     >
@@ -126,6 +120,6 @@ export default function PersonCard({ person }: PersonCardProps) {
           )}
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

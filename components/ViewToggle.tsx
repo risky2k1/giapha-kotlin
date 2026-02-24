@@ -2,27 +2,17 @@
 
 import { motion } from "framer-motion";
 import { List, ListTree, Network } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useDashboard } from "./DashboardContext";
 
 export type ViewMode = "list" | "tree" | "mindmap";
 
 export default function ViewToggle() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const currentView = (searchParams.get("view") as ViewMode) || "list";
-
-  const setView = (view: ViewMode) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("view", view);
-    router.push(`${pathname}?${params.toString()}`);
-  };
+  const { view: currentView, setView } = useDashboard();
 
   const tabs = [
-    { id: "list", label: "Danh sách", icon: <List className="w-4 h-4" /> },
-    { id: "tree", label: "Sơ đồ cây", icon: <Network className="w-4 h-4" /> },
-    { id: "mindmap", label: "Mindmap", icon: <ListTree className="w-4 h-4" /> },
+    { id: "list", label: "Danh sách", icon: <List className="size-4" /> },
+    { id: "tree", label: "Sơ đồ cây", icon: <Network className="size-4" /> },
+    { id: "mindmap", label: "Mindmap", icon: <ListTree className="size-4" /> },
   ] as const;
 
   return (
@@ -51,9 +41,7 @@ export default function ViewToggle() {
             >
               {tab.icon}
             </span>
-            <span className="hidden sm:inline-block tracking-wide">
-              {tab.label}
-            </span>
+            <span className="tracking-wide">{tab.label}</span>
           </button>
         );
       })}

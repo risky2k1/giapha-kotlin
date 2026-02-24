@@ -1,4 +1,5 @@
 import config from "@/app/config";
+import DashboardHeader from "@/components/DashboardHeader";
 import Footer from "@/components/Footer";
 import LogoutButton from "@/components/LogoutButton";
 import { createClient } from "@/utils/supabase/server";
@@ -25,9 +26,11 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_active")
+    .select("is_active, role")
     .eq("id", user.id)
     .single();
+
+  const isAdmin = profile?.role === "admin";
 
   if (!profile?.is_active) {
     return (
@@ -82,5 +85,14 @@ export default async function DashboardLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col font-sans">
+      <DashboardHeader isAdmin={isAdmin} userEmail={user.email} />
+      {children}
+      <Footer
+        className="mt-auto bg-white border-t border-stone-200"
+        showDisclaimer={true}
+      />
+    </div>
+  );
 }
