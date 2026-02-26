@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: giapha-postgres-dev
+    environment:
+      POSTGRES_DB: giapha_dev
+      POSTGRES_USER: giapha_dev_user
+      POSTGRES_PASSWORD: giapha_dev_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - giapha_db_dev_data:/var/lib/postgresql/data
+
+volumes:
+  giapha_db_dev_data:
+
