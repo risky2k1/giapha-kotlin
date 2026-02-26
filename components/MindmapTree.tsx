@@ -87,7 +87,7 @@ export default function MindmapTree({
               }}
             ></div>
             <div
-              className="absolute border-b-[1.5px] border-stone-300 rounded-bl-xl"
+              className="absolute border-l-[1.5px] border-b-[1.5px] border-stone-300 rounded-bl-xl"
               style={{
                 left: "0",
                 top: "24px",

@@ -1,18 +1,22 @@
 "use client";
 
 import MemberDetailContent from "@/components/MemberDetailContent";
+import MemberForm from "@/components/MemberForm";
 import { Person } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Edit2, ExternalLink, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, Edit2, ExternalLink, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDashboard } from "./DashboardContext";
 
 export default function MemberDetailModal() {
   const { memberModalId: memberId, setMemberModalId } = useDashboard();
+  const router = useRouter();
   const supabase = createClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,9 +30,9 @@ export default function MemberDetailModal() {
     unknown
   > | null>(null);
 
-  // Close modal by removing query parameter while keeping others
   const closeModal = () => {
     setMemberModalId(null);
+    setIsEditing(false);
   };
 
   const fetchData = useCallback(
@@ -90,14 +94,15 @@ export default function MemberDetailModal() {
   useEffect(() => {
     if (memberId) {
       setIsOpen(true);
+      setIsEditing(false); // always start on detail view when opening
       fetchData(memberId);
     } else {
       setIsOpen(false);
-      // Clean up previous data when closing to prevent flash on next open
       setTimeout(() => {
         setPerson(null);
         setPrivateData(null);
         setError(null);
+        setIsEditing(false);
       }, 300);
     }
   }, [memberId, fetchData]);
@@ -114,6 +119,22 @@ export default function MemberDetailModal() {
     };
   }, [isOpen]);
 
+  // Called by MemberForm after a successful save
+  const handleEditSuccess = (savedPersonId: string) => {
+    // Clear stale data first so the loading state is shown while refetching
+    setIsEditing(false);
+    setPerson(null);
+    setPrivateData(null);
+    fetchData(savedPersonId);
+    // Revalidate Next.js server component cache so the dashboard list/tree updates
+    router.refresh();
+  };
+
+  // initialData for MemberForm — merge public + private
+  const formInitialData = person
+    ? { ...person, ...(privateData ?? {}) }
+    : undefined;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -124,11 +145,13 @@ export default function MemberDetailModal() {
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-stone-900/40 backdrop-blur-sm"
         >
-          {/* Click-away backdrop */}
-          <div
-            className="absolute inset-0 cursor-pointer"
-            onClick={closeModal}
-          ></div>
+          {/* Click-away backdrop (disabled while editing to avoid accidental close) */}
+          {!isEditing && (
+            <div
+              className="absolute inset-0 cursor-pointer"
+              onClick={closeModal}
+            />
+          )}
 
           {/* Modal Content */}
           <motion.div
@@ -140,24 +163,35 @@ export default function MemberDetailModal() {
           >
             {/* Sticky Header Actions */}
             <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 flex items-center gap-2">
-              {isAdmin && person && (
-                <>
-                  <Link
-                    href={`/dashboard/members/${person.id}`}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-amber-100/80 backdrop-blur-md text-amber-800 rounded-full hover:bg-amber-200 font-semibold text-sm shadow-sm border border-amber-200/50 transition-colors"
-                  >
-                    <ExternalLink className="size-4" />
-                    <span className="hidden sm:inline">Xem chi tiết</span>
-                  </Link>
-                  <Link
-                    href={`/dashboard/members/${person.id}/edit`}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-amber-100/80 backdrop-blur-md text-amber-800 rounded-full hover:bg-amber-200 font-semibold text-sm shadow-sm border border-amber-200/50 transition-colors"
-                    onClick={closeModal}
-                  >
-                    <Edit2 className="size-4" />
-                    <span className="hidden sm:inline">Chỉnh sửa</span>
-                  </Link>
-                </>
+              {isEditing ? (
+                /* In edit mode — show "Back to detail" button */
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-stone-100/80 backdrop-blur-md text-stone-700 rounded-full hover:bg-stone-200 font-semibold text-sm shadow-sm border border-stone-200/50 transition-colors"
+                >
+                  <ArrowLeft className="size-4" />
+                  <span className="hidden sm:inline">Xem chi tiết</span>
+                </button>
+              ) : (
+                isAdmin &&
+                person && (
+                  <>
+                    <Link
+                      href={`/dashboard/members/${person.id}`}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-amber-100/80 backdrop-blur-md text-amber-800 rounded-full hover:bg-amber-200 font-semibold text-sm shadow-sm border border-amber-200/50 transition-colors"
+                    >
+                      <ExternalLink className="size-4" />
+                      <span className="hidden sm:inline">Xem chi tiết</span>
+                    </Link>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-amber-100/80 backdrop-blur-md text-amber-800 rounded-full hover:bg-amber-200 font-semibold text-sm shadow-sm border border-amber-200/50 transition-colors"
+                    >
+                      <Edit2 className="size-4" />
+                      <span className="hidden sm:inline">Chỉnh sửa</span>
+                    </button>
+                  </>
+                )
               )}
               <button
                 onClick={closeModal}
@@ -186,7 +220,26 @@ export default function MemberDetailModal() {
                   Đóng
                 </button>
               </div>
+            ) : isEditing && formInitialData ? (
+              /* ── EDIT MODE ── */
+              <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-8 pt-16 pb-8">
+                <h2 className="text-xl font-serif font-bold text-stone-800 mb-6">
+                  Chỉnh sửa thành viên
+                </h2>
+                <MemberForm
+                  initialData={
+                    formInitialData as Parameters<
+                      typeof MemberForm
+                    >[0]["initialData"]
+                  }
+                  isEditing={true}
+                  isAdmin={isAdmin}
+                  onSuccess={handleEditSuccess}
+                  onCancel={() => setIsEditing(false)}
+                />
+              </div>
             ) : person ? (
+              /* ── DETAIL MODE ── */
               <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <MemberDetailContent
                   person={person}

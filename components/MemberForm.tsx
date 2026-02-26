@@ -22,12 +22,18 @@ interface MemberFormProps {
   initialData?: Person;
   isEditing?: boolean;
   isAdmin?: boolean;
+  /** Called with the saved person's ID after a successful save. Overrides default router.push. */
+  onSuccess?: (personId: string) => void;
+  /** Called when user clicks Cancel. Overrides default router.back(). */
+  onCancel?: () => void;
 }
 
 export default function MemberForm({
   initialData,
   isEditing = false,
   isAdmin = false,
+  onSuccess,
+  onCancel,
 }: MemberFormProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -205,9 +211,15 @@ export default function MemberForm({
         if (privateError) throw privateError;
       }
 
-      // Redirect to the detail page of the created/edited person so user can easily add relationships
-      router.push("/dashboard/members/" + personId);
-      router.refresh();
+      // After save: use callback if provided, otherwise fall back to page navigation
+      if (!personId)
+        throw new Error("Không lấy được ID thành viên sau khi lưu.");
+      if (onSuccess) {
+        onSuccess(personId);
+      } else {
+        router.push("/dashboard/members/" + personId);
+        router.refresh();
+      }
     } catch (err) {
       console.error("Error saving member:", err);
       setError((err as Error).message || "Failed to save member");
@@ -673,7 +685,11 @@ export default function MemberForm({
         transition={{ delay: 0.2 }}
         className="flex justify-end gap-3 sm:gap-4 pt-6"
       >
-        <button type="button" onClick={() => router.back()} className="btn">
+        <button
+          type="button"
+          onClick={() => (onCancel ? onCancel() : router.back())}
+          className="btn"
+        >
           Hủy bỏ
         </button>
         <button type="submit" disabled={loading} className="btn-primary">
