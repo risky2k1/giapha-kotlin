@@ -28,6 +28,7 @@ CREATE TABLE persons (
   is_deceased BOOLEAN NOT NULL DEFAULT FALSE,
   is_in_law BOOLEAN NOT NULL DEFAULT FALSE,
   birth_order INT,
+  generation INT,
   avatar_url TEXT,
   note TEXT,
   

@@ -1,7 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Database, Settings, UserCircle } from "lucide-react";
+import {
+  ChevronDown,
+  Database,
+  Network,
+  Settings,
+  UserCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import LogoutButton from "./LogoutButton";
@@ -72,6 +78,14 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
                   >
                     <Settings className="size-4" />
                     Quản lý Người dùng
+                  </Link>
+                  <Link
+                    href="/dashboard/lineage"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                  >
+                    <Network className="size-4" />
+                    Thứ tự gia phả
                   </Link>
                   <Link
                     href="/dashboard/data"

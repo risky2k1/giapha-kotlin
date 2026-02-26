@@ -102,9 +102,20 @@ export default function FamilyTree({
         r.person_a === personId,
     );
 
-    const childrenList = childRels
-      .map((r) => personsMap.get(r.person_b))
-      .filter(Boolean) as Person[];
+    const childrenList = (
+      childRels
+        .map((r) => personsMap.get(r.person_b))
+        .filter(Boolean) as Person[]
+    ).sort((a, b) => {
+      // 1. birth_order ascending (null → pushed to end)
+      const aOrder = a.birth_order ?? Infinity;
+      const bOrder = b.birth_order ?? Infinity;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      // 2. birth_year ascending (null → pushed to end)
+      const aYear = a.birth_year ?? Infinity;
+      const bYear = b.birth_year ?? Infinity;
+      return aYear - bYear;
+    });
 
     // If there is only one spouse, or NO spouse, we can just lump all children together.
     // Standard family trees often combine all children under the main node
@@ -117,7 +128,14 @@ export default function FamilyTree({
   };
 
   // Recursive function for rendering nodes
-  const renderTreeNode = (personId: string): React.ReactNode => {
+  // Tracks visited IDs to prevent infinite loops from circular relationships
+  const renderTreeNode = (
+    personId: string,
+    visited: Set<string> = new Set(),
+  ): React.ReactNode => {
+    if (visited.has(personId)) return null; // cycle guard
+    visited.add(personId);
+
     const data = getTreeData(personId);
     if (!data.person) return null;
 
@@ -156,7 +174,7 @@ export default function FamilyTree({
           <ul>
             {data.children.map((child) => (
               <React.Fragment key={child.id}>
-                {renderTreeNode(child.id)}
+                {renderTreeNode(child.id, new Set(visited))}
               </React.Fragment>
             ))}
           </ul>

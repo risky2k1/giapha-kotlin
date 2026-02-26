@@ -45,6 +45,7 @@ export interface Person {
   is_deceased: boolean;
   is_in_law: boolean;
   birth_order: number | null;
+  generation: number | null;
 }
 
 export interface Relationship {

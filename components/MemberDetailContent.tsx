@@ -122,6 +122,11 @@ export default function MemberDetailContent({
                     : `Con thứ ${person.birth_order}`}
                 </span>
               )}
+              {person.generation != null && (
+                <span className="text-[10px] sm:text-xs font-sans font-bold rounded-md px-2 py-0.5 whitespace-nowrap shadow-xs border text-emerald-700 bg-emerald-50/60 border-emerald-200/60 uppercase tracking-wider">
+                  Đời thứ {person.generation}
+                </span>
+              )}
             </h1>
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">

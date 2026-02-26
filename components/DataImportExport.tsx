@@ -71,14 +71,14 @@ export default function DataImportExport() {
         );
       }
 
-      await importData({
+      const result = await importData({
         persons: payload.persons,
         relationships: payload.relationships,
       });
 
       setImportStatus({
         type: "success",
-        message: "Phục hồi dữ liệu thành công!",
+        message: `Phục hồi thành công! Đã nhập ${result.imported.persons} thành viên và ${result.imported.relationships} quan hệ.`,
       });
       setShowConfirm(false);
       setSelectedFile(null);

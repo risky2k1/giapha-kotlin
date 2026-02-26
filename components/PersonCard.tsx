@@ -92,7 +92,10 @@ export default function PersonCard({ person }: PersonCardProps) {
                 ` → ${formatDisplayDate(person.death_year, person.death_month, person.death_day)}`}
             </span>
           </p>
-          {(isDeceased || person.is_in_law || person.birth_order != null) && (
+          {(isDeceased ||
+            person.is_in_law ||
+            person.birth_order != null ||
+            person.generation != null) && (
             <div className="flex flex-wrap items-center gap-1.5 shrink-0 mt-2">
               {isDeceased && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-stone-100 text-stone-500 uppercase tracking-widest border border-stone-200/60 shadow-xs">
@@ -121,6 +124,11 @@ export default function PersonCard({ person }: PersonCardProps) {
                   {person.birth_order === 1
                     ? "Con trưởng"
                     : `Con thứ ${person.birth_order}`}
+                </span>
+              )}
+              {person.generation != null && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60 uppercase tracking-widest shadow-xs">
+                  Đời thứ {person.generation}
                 </span>
               )}
             </div>
